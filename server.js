@@ -1,6 +1,9 @@
-import express from "express";
-import cors from "cors";
-import bodyParser from "body-parser";
+
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+// Dynamic import for node-fetch which is ESM only
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
 const PORT = 3001;
@@ -10,39 +13,39 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // --- PROXY ENDPOINT FOR DEEPSEEK ---
-app.post("/api/deepseek", async (req, res) => {
+app.post('/api/deepseek', async (req, res) => {
   const { apiKey, systemPrompt, userPrompt } = req.body;
 
   if (!apiKey) {
-    return res.status(400).json({ error: "Missing API Key" });
+    return res.status(400).json({ error: 'Missing API Key' });
   }
 
-  console.log("[Proxy] Forwarding request to DeepSeek...");
+  console.log(`[Proxy] Forwarding request to DeepSeek...`);
 
   try {
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
+        "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: "deepseek-chat",
         messages: [
-          {
-            role: "system",
-            content: `${systemPrompt}\n\nIMPORTANT: You must respond with valid JSON.`
+          { 
+            role: "system", 
+            content: `${systemPrompt}\n\nIMPORTANT: You must respond with valid JSON.` 
           },
           { role: "user", content: userPrompt }
         ],
         response_format: { type: "json_object" },
-        temperature: 1.0
+        temperature: 1.0 
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("[DeepSeek API Error]", response.status, errorText);
+      console.error(`[DeepSeek API Error]: ${response.status} - ${errorText}`);
       return res.status(response.status).send(errorText);
     }
 
@@ -50,18 +53,16 @@ app.post("/api/deepseek", async (req, res) => {
     res.json(data);
 
   } catch (error) {
-    console.error("[Proxy Error]", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error('[Proxy Error]:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
 // --- Start server ---
 app.listen(PORT, () => {
   console.log(`
-🚀 Deep Dissect Proxy Server running on http://localhost:${PORT}
-----------------------------------------------------------
-> ESM mode enabled
-> Node ${process.version}
-> Proxying DeepSeek API
-`);
+  🚀 Deep Dissect Proxy Server running on http://localhost:${PORT}
+  ----------------------------------------------------------
+  > Ready to bypass CORS for DeepSeek API.
+  `);
 });
