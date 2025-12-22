@@ -48,7 +48,9 @@ const checkDataIntegrity = (configId: string, response: any, expectedStructureJS
 
 // --- PROXY CALLER ---
 async function callDeepSeekProxy(systemPrompt: string, userPrompt: string, apiKey: string): Promise<any> {
-  const PROXY_URL = "http://localhost:3001/api/deepseek";
+  // 自动判断环境：开发环境用 localhost:3001，生产环境用相对路径 /api/deepseek (由 Nginx 代理)
+  const isDev = import.meta.env.DEV;
+  const PROXY_URL = isDev ? "http://localhost:3001/api/deepseek" : "/api/deepseek";
 
   console.groupCollapsed("🚀 DeepSeek Request (Via Local Proxy)");
   console.log("Target:", PROXY_URL);
@@ -73,7 +75,7 @@ async function callDeepSeekProxy(systemPrompt: string, userPrompt: string, apiKe
     if (!response.ok) {
       const errText = await response.text();
       console.error(`❌ Proxy Error [${response.status}]:`, errText);
-      throw new Error(`Proxy Error: ${response.statusText} (Ensure server.js is running on port 3001)`);
+      throw new Error(`Proxy Error: ${response.statusText}`);
     }
 
     const data = await response.json();
