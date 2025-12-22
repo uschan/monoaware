@@ -95,8 +95,12 @@ async function callDeepSeekProxy(systemPrompt: string, userPrompt: string, apiKe
 }
 
 const getGeminiClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("Gemini API_KEY not found in environment.");
+  // FIX: Vite uses import.meta.env.VITE_... variables, not process.env
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error("❌ GEMINI API KEY MISSING. Please set VITE_GEMINI_API_KEY in .env file.");
+    throw new Error("Gemini API_KEY not found in environment.");
+  }
   return new GoogleGenAI({ apiKey });
 };
 

@@ -1,7 +1,6 @@
 
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 // Dynamic import for node-fetch which is ESM only
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
@@ -10,7 +9,9 @@ const PORT = 3001;
 
 // --- Middleware ---
 app.use(cors());
-app.use(bodyParser.json());
+
+// Fix: Use express.json() instead of body-parser to avoid dependency issues on some environments
+app.use(express.json());
 
 // --- PROXY ENDPOINT FOR DEEPSEEK ---
 app.post('/api/deepseek', async (req, res) => {
