@@ -242,7 +242,7 @@ export const DebateConfig: AIToolConfig<string> = {
     "必须用简体中文。必须有3个回合。每个招式要有伤害值。"
   ),
   userPromptBuilder: (topic) => `开启辩论角斗。话题："${topic}"。`,
-  jsonStructure: `{ "topic": "string", "redFighter": {}, "blueFighter": {}, "rounds": [], "winner": "DRAW", "fatalityMove": "string" }`,
+  jsonStructure: `{ "topic": "string", "redFighter": { "name": "string", "style": "string" }, "blueFighter": { "name": "string", "style": "string" }, "rounds": [], "winner": "DRAW", "fatalityMove": "string" }`,
   schema: { type: Type.OBJECT, properties: { topic: {type: Type.STRING}, redFighter: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, style: {type: Type.STRING}}}, blueFighter: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, style: {type: Type.STRING}}}, rounds: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {roundName: {type: Type.STRING}, redMove: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, content: {type: Type.STRING}, damage: {type: Type.NUMBER}}}, blueMove: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, content: {type: Type.STRING}, damage: {type: Type.NUMBER}}}}}}, winner: {type: Type.STRING, enum: ['RED', 'BLUE', 'DRAW']}, fatalityMove: {type: Type.STRING} } },
   extractor: (data: any) => ({
       topic: data.topic || "",

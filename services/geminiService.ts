@@ -49,7 +49,16 @@ const checkDataIntegrity = (configId: string, response: any, expectedStructureJS
 // --- PROXY CALLER ---
 async function callDeepSeekProxy(systemPrompt: string, userPrompt: string, apiKey: string): Promise<any> {
   // 自动判断环境：开发环境用 localhost:3001，生产环境用相对路径 /api/deepseek (由 Nginx 代理)
-  const isDev = import.meta.env.DEV;
+  // Safely check for DEV mode
+  let isDev = false;
+  try {
+    // @ts-ignore
+    if (import.meta && import.meta.env) {
+      // @ts-ignore
+      isDev = import.meta.env.DEV;
+    }
+  } catch(e) {}
+
   const PROXY_URL = isDev ? "http://localhost:3001/api/deepseek" : "/api/deepseek";
 
   console.groupCollapsed("🚀 DeepSeek Request (Via Local Proxy)");
@@ -95,8 +104,30 @@ async function callDeepSeekProxy(systemPrompt: string, userPrompt: string, apiKe
 }
 
 const getGeminiClient = () => {
-  // FIX: Vite uses import.meta.env.VITE_... variables, not process.env
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  let apiKey = '';
+
+  // 1. Try Vite standard import.meta.env (Safe access)
+  try {
+    // @ts-ignore
+    const env = import.meta.env; 
+    if (env && env.VITE_GEMINI_API_KEY) {
+       apiKey = env.VITE_GEMINI_API_KEY;
+    }
+  } catch (e) {
+    // Ignore errors if import.meta is not defined
+  }
+
+  // 2. Fallback to process.env (Node/Webpack standard)
+  if (!apiKey) {
+    try {
+      // @ts-ignore
+      if (typeof process !== 'undefined' && process.env) {
+         // @ts-ignore
+         apiKey = process.env.API_KEY || process.env.VITE_GEMINI_API_KEY;
+      }
+    } catch (e) {}
+  }
+
   if (!apiKey) {
     console.error("❌ GEMINI API KEY MISSING. Please set VITE_GEMINI_API_KEY in .env file.");
     throw new Error("Gemini API_KEY not found in environment.");

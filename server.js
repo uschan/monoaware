@@ -1,16 +1,13 @@
 
 const express = require('express');
 const cors = require('cors');
-// Dynamic import for node-fetch which is ESM only
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+// Node.js 18+ has native fetch. No need for node-fetch.
 
 const app = express();
 const PORT = 3001;
 
 // --- Middleware ---
 app.use(cors());
-
-// Fix: Use express.json() instead of body-parser to avoid dependency issues on some environments
 app.use(express.json());
 
 // --- PROXY ENDPOINT FOR DEEPSEEK ---
@@ -18,12 +15,14 @@ app.post('/api/deepseek', async (req, res) => {
   const { apiKey, systemPrompt, userPrompt } = req.body;
 
   if (!apiKey) {
+    console.warn('[Proxy] Missing API Key in request');
     return res.status(400).json({ error: 'Missing API Key' });
   }
 
   console.log(`[Proxy] Forwarding request to DeepSeek...`);
 
   try {
+    // Use Node.js native fetch
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -46,16 +45,18 @@ app.post('/api/deepseek', async (req, res) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`[DeepSeek API Error]: ${response.status} - ${errorText}`);
+      console.error(`[DeepSeek API Error] Status: ${response.status}`);
+      console.error(`[DeepSeek API Response]: ${errorText}`);
       return res.status(response.status).send(errorText);
     }
 
     const data = await response.json();
+    console.log(`[Proxy] Success. Sending data back to client.`);
     res.json(data);
 
   } catch (error) {
-    console.error('[Proxy Error]:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('[Proxy Internal Error]:', error);
+    res.status(500).json({ error: 'Internal Server Error: ' + error.message });
   }
 });
 
@@ -64,6 +65,7 @@ app.listen(PORT, () => {
   console.log(`
   🚀 Deep Dissect Proxy Server running on http://localhost:${PORT}
   ----------------------------------------------------------
-  > Ready to bypass CORS for DeepSeek API.
+  > Node Version: ${process.version}
+  > Using native fetch.
   `);
 });
