@@ -10,7 +10,33 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// --- PROXY ENDPOINT FOR DEEPSEEK ---
+// --- LOGGING MIDDLEWARE (See requests in PM2 logs) ---
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// --- TEST ROUTE (GET /) ---
+app.get('/', (req, res) => {
+  res.send(`
+    <h1>✅ Deep Dissect Server is Online</h1>
+    <p>Port: ${PORT}</p>
+    <p>Status: Ready to proxy requests.</p>
+  `);
+});
+
+// --- TEST ROUTE (GET /api/deepseek) ---
+// Explains that this is an API endpoint, not a file.
+app.get('/api/deepseek', (req, res) => {
+  res.status(405).send(`
+    <h1>ℹ️ API Endpoint Exists</h1>
+    <p>This path <code>/api/deepseek</code> is a virtual route handled by Express.</p>
+    <p>❌ <b>GET</b> method is not supported.</p>
+    <p>✅ Please use <b>POST</b> method with JSON body containing <code>apiKey</code>, <code>systemPrompt</code>, and <code>userPrompt</code>.</p>
+  `);
+});
+
+// --- PROXY ENDPOINT FOR DEEPSEEK (POST) ---
 app.post('/api/deepseek', async (req, res) => {
   const { apiKey, systemPrompt, userPrompt } = req.body;
 
@@ -67,5 +93,6 @@ app.listen(PORT, () => {
   ----------------------------------------------------------
   > Node Version: ${process.version}
   > Using native fetch.
+  > Ready to handle POST /api/deepseek
   `);
 });
