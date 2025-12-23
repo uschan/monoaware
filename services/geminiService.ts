@@ -39,7 +39,7 @@ const checkDataIntegrity = (configId: string, response: any, expectedStructureJS
     if (missingKeys.length > 0) {
       console.warn(`⚠️ [${configId}] DATA INTEGRITY ALARM: Missing keys`, missingKeys);
     } else {
-      console.log(`✅ [${configId}] Integrity Check Passed`);
+      // console.log(`✅ [${configId}] Integrity Check Passed`);
     }
   } catch (e) {
     // Ignore check errors
@@ -62,11 +62,6 @@ async function callDeepSeekProxy(systemPrompt: string, userPrompt: string, apiKe
   // In production (VPS), Nginx handles /api/deepseek -> localhost:3001
   // In local dev, we might need direct access if proxy isn't set up
   const PROXY_URL = isDev ? "http://localhost:3001/api/deepseek" : "/api/deepseek";
-
-  console.groupCollapsed("🚀 DeepSeek Request (Via Local Proxy)");
-  console.log("Target:", PROXY_URL);
-  console.log("System:", systemPrompt);
-  console.groupEnd();
 
   try {
     const response = await fetch(PROXY_URL, {
@@ -154,10 +149,6 @@ const getGeminiClient = () => {
 };
 
 async function callGemini<T>(systemPrompt: string, userPrompt: string, schema: Schema): Promise<T> {
-  console.groupCollapsed("✨ Gemini Request (Fallback)");
-  console.log("System:", systemPrompt);
-  console.groupEnd();
-
   try {
     const ai = getGeminiClient();
     
