@@ -48,23 +48,24 @@ const checkDataIntegrity = (configId: string, response: any, expectedStructureJS
 
 // --- PROXY CALLER ---
 async function callDeepSeekProxy(systemPrompt: string, userPrompt: string, apiKey: string): Promise<any> {
-  // 自动判断环境：开发环境用 localhost:3001，生产环境用相对路径 /api/deepseek (由 Nginx 代理)
-  // Safely check for DEV mode
+  // Safely check for DEV mode using a try-catch to avoid crashing if import.meta is undefined
   let isDev = false;
   try {
     // @ts-ignore
-    if (import.meta && import.meta.env) {
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
       // @ts-ignore
       isDev = import.meta.env.DEV;
     }
   } catch(e) {}
 
+  // Determine URL based on environment
+  // In production (VPS), Nginx handles /api/deepseek -> localhost:3001
+  // In local dev, we might need direct access if proxy isn't set up
   const PROXY_URL = isDev ? "http://localhost:3001/api/deepseek" : "/api/deepseek";
 
   console.groupCollapsed("🚀 DeepSeek Request (Via Local Proxy)");
   console.log("Target:", PROXY_URL);
   console.log("System:", systemPrompt);
-  console.log("User:", userPrompt);
   console.groupEnd();
 
   try {
@@ -82,18 +83,24 @@ async function callDeepSeekProxy(systemPrompt: string, userPrompt: string, apiKe
     });
 
     if (!response.ok) {
+      const status = response.status;
       const errText = await response.text();
-      console.error(`❌ Proxy Error [${response.status}]:`, errText);
-      throw new Error(`Proxy Error: ${response.statusText}`);
+      
+      console.error(`❌ Proxy Error [${status}]:`);
+      console.error(errText); // Log the full HTML/Text response from server
+
+      if (status === 502) {
+        throw new Error(`Proxy 502 Bad Gateway. The Node server might be down. Check PM2 logs.`);
+      }
+      if (status === 404) {
+        throw new Error(`Proxy 404 Not Found. Ensure server.js is running and Nginx is configured.`);
+      }
+      throw new Error(`Proxy Error: ${status} ${response.statusText}`);
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
     
-    console.groupCollapsed("✅ DeepSeek Response Success");
-    console.log(content);
-    console.groupEnd();
-
     if (!content) throw new Error("Empty response from DeepSeek");
     return JSON.parse(content);
 
@@ -103,42 +110,52 @@ async function callDeepSeekProxy(systemPrompt: string, userPrompt: string, apiKe
   }
 }
 
+// --- ROBUST API KEY RETRIEVAL ---
 const getGeminiClient = () => {
   let apiKey = '';
 
-  // 1. Try Vite standard import.meta.env (Safe access)
+  // 1. Try import.meta.env (Vite) - Wrapped in rigorous try-catch
   try {
     // @ts-ignore
-    const env = import.meta.env; 
-    if (env && env.VITE_GEMINI_API_KEY) {
-       apiKey = env.VITE_GEMINI_API_KEY;
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      // @ts-ignore
+      if (import.meta.env.VITE_GEMINI_API_KEY) {
+        // @ts-ignore
+        apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      }
     }
   } catch (e) {
-    // Ignore errors if import.meta is not defined
+    // console.debug("import.meta.env access failed (expected in some envs)");
   }
 
-  // 2. Fallback to process.env (Node/Webpack standard)
+  // 2. Try process.env (Node/Webpack) - Wrapped in rigorous try-catch
   if (!apiKey) {
     try {
       // @ts-ignore
       if (typeof process !== 'undefined' && process.env) {
          // @ts-ignore
-         apiKey = process.env.API_KEY || process.env.VITE_GEMINI_API_KEY;
+         if (process.env.VITE_GEMINI_API_KEY) apiKey = process.env.VITE_GEMINI_API_KEY;
+         // @ts-ignore
+         else if (process.env.API_KEY) apiKey = process.env.API_KEY;
       }
-    } catch (e) {}
+    } catch (e) {
+      // console.debug("process.env access failed");
+    }
   }
 
   if (!apiKey) {
     console.error("❌ GEMINI API KEY MISSING. Please set VITE_GEMINI_API_KEY in .env file.");
-    throw new Error("Gemini API_KEY not found in environment.");
+    // Return a dummy client to prevent immediate crash, allow UI to handle error gracefully if called
+    // But throwing here is better to alert developer.
+    throw new Error("Gemini API_KEY not found in environment variables (VITE_GEMINI_API_KEY or API_KEY).");
   }
+  
   return new GoogleGenAI({ apiKey });
 };
 
 async function callGemini<T>(systemPrompt: string, userPrompt: string, schema: Schema): Promise<T> {
-  console.groupCollapsed("✨ Gemini Request (Fallback/Default)");
+  console.groupCollapsed("✨ Gemini Request (Fallback)");
   console.log("System:", systemPrompt);
-  console.log("User:", userPrompt);
   console.groupEnd();
 
   try {
@@ -162,10 +179,6 @@ async function callGemini<T>(systemPrompt: string, userPrompt: string, schema: S
       throw new Error("Gemini returned empty text");
     }
     
-    console.groupCollapsed("✅ Gemini Response");
-    console.log(response.text);
-    console.groupEnd();
-
     return JSON.parse(response.text) as T;
   } catch (error) {
     console.error("🔥 Gemini Call Failed:", error);

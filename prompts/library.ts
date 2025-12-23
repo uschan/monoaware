@@ -31,7 +31,18 @@ export const AntiLifeConfig: AIToolConfig<{profile: string, weakness: string}> =
   ),
   userPromptBuilder: ({profile, weakness}) => `计划/目标："${profile}"\n已知弱点/担忧："${weakness}"\n\n请出具尸检报告。`,
   jsonStructure: `{ "deathTime": "string", "causeOfDeath": "string", "clinicalAnalysis": "string", "fatalSymptom": "string", "preventableMeasure": "string", "survivalRate": 0 }`,
-  schema: { type: Type.OBJECT, properties: { deathTime: {type: Type.STRING}, causeOfDeath: {type: Type.STRING}, clinicalAnalysis: {type: Type.STRING}, fatalSymptom: {type: Type.STRING}, preventableMeasure: {type: Type.STRING}, survivalRate: {type: Type.NUMBER} } }
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      deathTime: {type: Type.STRING}, 
+      causeOfDeath: {type: Type.STRING}, 
+      clinicalAnalysis: {type: Type.STRING}, 
+      fatalSymptom: {type: Type.STRING}, 
+      preventableMeasure: {type: Type.STRING}, 
+      survivalRate: {type: Type.NUMBER} 
+    },
+    required: ["deathTime", "causeOfDeath", "clinicalAnalysis", "fatalSymptom", "preventableMeasure", "survivalRate"]
+  }
 };
 
 export const BiasConfig: AIToolConfig<string> = {
@@ -43,7 +54,28 @@ export const BiasConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (text) => `扫描样本："${text}"。`,
   jsonStructure: `{ "infectionRate": 0, "overallDiagnosis": "string", "viruses": [], "quarantineAdvice": "string" }`,
-  schema: { type: Type.OBJECT, properties: { infectionRate: {type: Type.NUMBER}, overallDiagnosis: {type: Type.STRING}, viruses: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, severity: {type: Type.STRING, enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']}, symptom: {type: Type.STRING}, treatment: {type: Type.STRING}}}}, quarantineAdvice: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      infectionRate: {type: Type.NUMBER}, 
+      overallDiagnosis: {type: Type.STRING}, 
+      viruses: {
+        type: Type.ARRAY, 
+        items: {
+          type: Type.OBJECT, 
+          properties: {
+            name: {type: Type.STRING}, 
+            severity: {type: Type.STRING, enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']}, 
+            symptom: {type: Type.STRING}, 
+            treatment: {type: Type.STRING}
+          },
+          required: ["name", "severity", "symptom", "treatment"]
+        }
+      }, 
+      quarantineAdvice: {type: Type.STRING} 
+    },
+    required: ["infectionRate", "overallDiagnosis", "viruses", "quarantineAdvice"]
+  },
   extractor: (data: any) => ({
       infectionRate: data.infectionRate || 0,
       overallDiagnosis: data.overallDiagnosis || "样本纯净",
@@ -61,7 +93,18 @@ export const WorldSimConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (premise) => `异变点假设："${premise}"。观测该宇宙。`,
   jsonStructure: `{ "chaosLevel": 0, "divergencePoint": "string", "timeline": [], "breakingNews": {}, "newLaws": [], "survivorGuide": {} }`,
-  schema: { type: Type.OBJECT, properties: { chaosLevel: {type: Type.NUMBER}, divergencePoint: {type: Type.STRING}, timeline: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {year: {type: Type.STRING}, event: {type: Type.STRING}, impact: {type: Type.STRING}}}}, breakingNews: {type: Type.OBJECT, properties: {headline: {type: Type.STRING}, source: {type: Type.STRING}, date: {type: Type.STRING}}}, newLaws: {type: Type.ARRAY, items: {type: Type.STRING}}, survivorGuide: {type: Type.OBJECT, properties: {role: {type: Type.STRING}, keySkill: {type: Type.STRING}, mustHaveItem: {type: Type.STRING}}} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      chaosLevel: {type: Type.NUMBER}, 
+      divergencePoint: {type: Type.STRING}, 
+      timeline: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {year: {type: Type.STRING}, event: {type: Type.STRING}, impact: {type: Type.STRING}}, required: ["year", "event", "impact"]}}, 
+      breakingNews: {type: Type.OBJECT, properties: {headline: {type: Type.STRING}, source: {type: Type.STRING}, date: {type: Type.STRING}}, required: ["headline", "source", "date"]}, 
+      newLaws: {type: Type.ARRAY, items: {type: Type.STRING}}, 
+      survivorGuide: {type: Type.OBJECT, properties: {role: {type: Type.STRING}, keySkill: {type: Type.STRING}, mustHaveItem: {type: Type.STRING}}, required: ["role", "keySkill", "mustHaveItem"]} 
+    },
+    required: ["chaosLevel", "divergencePoint", "timeline", "breakingNews", "newLaws", "survivorGuide"]
+  },
   extractor: (data: any) => ({
       chaosLevel: data.chaosLevel || 0,
       divergencePoint: data.divergencePoint || "",
@@ -81,7 +124,17 @@ export const SubtextConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (text) => `分析拦截的通讯："${text}"`,
   jsonStructure: `{ "bullshitMeter": 0, "voiceStressAnalysis": "string", "declassifiedContent": [], "verdict": "string", "powerDynamics": "string" }`,
-  schema: { type: Type.OBJECT, properties: { bullshitMeter: {type: Type.NUMBER}, voiceStressAnalysis: {type: Type.STRING}, declassifiedContent: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {original: {type: Type.STRING}, decoded: {type: Type.STRING}, intent: {type: Type.STRING}}}}, verdict: {type: Type.STRING}, powerDynamics: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      bullshitMeter: {type: Type.NUMBER}, 
+      voiceStressAnalysis: {type: Type.STRING}, 
+      declassifiedContent: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {original: {type: Type.STRING}, decoded: {type: Type.STRING}, intent: {type: Type.STRING}}, required: ["original", "decoded", "intent"]}}, 
+      verdict: {type: Type.STRING}, 
+      powerDynamics: {type: Type.STRING} 
+    },
+    required: ["bullshitMeter", "voiceStressAnalysis", "declassifiedContent", "verdict", "powerDynamics"]
+  },
   extractor: (data: any) => ({
       bullshitMeter: data.bullshitMeter || 0,
       voiceStressAnalysis: data.voiceStressAnalysis || "无明显压力",
@@ -100,7 +153,17 @@ export const EgoBoundaryConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (desc) => `启动风洞测试。测试对象自述："${desc}"。`,
   jsonStructure: `{ "integrityScore": 0, "yieldPoint": {}, "fractureMode": "string", "structuralWeaknesses": [], "reinforcementPlan": "string" }`,
-  schema: { type: Type.OBJECT, properties: { integrityScore: {type: Type.NUMBER}, yieldPoint: {type: Type.OBJECT, properties: {trigger: {type: Type.STRING}, pressureLevel: {type: Type.STRING}}}, fractureMode: {type: Type.STRING}, structuralWeaknesses: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {location: {type: Type.STRING}, description: {type: Type.STRING}, riskLevel: {type: Type.STRING, enum: ['LOW', 'MED', 'HIGH', 'CRITICAL']}}}}, reinforcementPlan: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      integrityScore: {type: Type.NUMBER}, 
+      yieldPoint: {type: Type.OBJECT, properties: {trigger: {type: Type.STRING}, pressureLevel: {type: Type.STRING}}, required: ["trigger", "pressureLevel"]}, 
+      fractureMode: {type: Type.STRING}, 
+      structuralWeaknesses: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {location: {type: Type.STRING}, description: {type: Type.STRING}, riskLevel: {type: Type.STRING, enum: ['LOW', 'MED', 'HIGH', 'CRITICAL']}}, required: ["location", "description", "riskLevel"]}}, 
+      reinforcementPlan: {type: Type.STRING} 
+    },
+    required: ["integrityScore", "yieldPoint", "fractureMode", "structuralWeaknesses", "reinforcementPlan"]
+  },
   extractor: (data: any) => ({
       integrityScore: data.integrityScore || 0,
       yieldPoint: data.yieldPoint || { trigger: "Unknown", pressureLevel: "Unknown" },
@@ -119,7 +182,17 @@ export const LangSmellConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (text) => `分析样本："${text}"。`,
   jsonStructure: `{ "composition": [], "scentProfile": {}, "toxicityPPM": 0, "aiProbability": 0, "detectionLog": "string" }`,
-  schema: { type: Type.OBJECT, properties: { composition: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {label: {type: Type.STRING}, percentage: {type: Type.NUMBER}, colorCode: {type: Type.STRING}}}}, scentProfile: {type: Type.OBJECT, properties: {topNote: {type: Type.STRING}, middleNote: {type: Type.STRING}, baseNote: {type: Type.STRING}}}, toxicityPPM: {type: Type.NUMBER}, aiProbability: {type: Type.NUMBER}, detectionLog: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      composition: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {label: {type: Type.STRING}, percentage: {type: Type.NUMBER}, colorCode: {type: Type.STRING}}, required: ["label", "percentage"]}}, 
+      scentProfile: {type: Type.OBJECT, properties: {topNote: {type: Type.STRING}, middleNote: {type: Type.STRING}, baseNote: {type: Type.STRING}}, required: ["topNote", "middleNote", "baseNote"]}, 
+      toxicityPPM: {type: Type.NUMBER}, 
+      aiProbability: {type: Type.NUMBER}, 
+      detectionLog: {type: Type.STRING} 
+    },
+    required: ["composition", "scentProfile", "toxicityPPM", "aiProbability", "detectionLog"]
+  },
   extractor: (data: any) => ({
       composition: Array.isArray(data.composition) ? data.composition : [],
       scentProfile: data.scentProfile || { topNote: "", middleNote: "", baseNote: "" },
@@ -141,13 +214,14 @@ export const DecisionMatrixConfig: AIToolConfig<DecisionInput> = {
   schema: {
     type: Type.OBJECT,
     properties: {
-      decision_nature: { type: Type.OBJECT, properties: { type: {type: Type.STRING}, core_conflict: {type: Type.STRING}, key_uncertainty: {type: Type.STRING} } },
-      comparison_matrix: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { option: {type: Type.STRING}, short_term_gain: {type: Type.STRING}, medium_term_risk: {type: Type.STRING}, long_term_ceiling: {type: Type.STRING}, irreversibility: {type: Type.STRING}, exit_path: {type: Type.STRING}, emotional_sustainability: {type: Type.STRING} } } },
-      risk_warnings: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { option: {type: Type.STRING}, underestimated_risk: {type: Type.STRING}, why_it_is_dangerous: {type: Type.STRING} } } },
-      experimentation_suggestions: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { option: {type: Type.STRING}, test_method: {type: Type.STRING}, cost: {type: Type.STRING}, timeframe: {type: Type.STRING} } } },
-      stop_loss_signals: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { option: {type: Type.STRING}, signal: {type: Type.STRING}, action: {type: Type.STRING} } } },
-      cooling_advice: { type: Type.OBJECT, properties: { emotional_bias_detected: {type: Type.STRING}, recommended_wait_time: {type: Type.STRING}, recheck_questions: {type: Type.ARRAY, items: {type: Type.STRING}} } }
-    }
+      decision_nature: { type: Type.OBJECT, properties: { type: {type: Type.STRING}, core_conflict: {type: Type.STRING}, key_uncertainty: {type: Type.STRING} }, required: ["type", "core_conflict", "key_uncertainty"] },
+      comparison_matrix: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { option: {type: Type.STRING}, short_term_gain: {type: Type.STRING}, medium_term_risk: {type: Type.STRING}, long_term_ceiling: {type: Type.STRING}, irreversibility: {type: Type.STRING}, exit_path: {type: Type.STRING}, emotional_sustainability: {type: Type.STRING} }, required: ["option", "short_term_gain", "medium_term_risk", "long_term_ceiling", "irreversibility", "exit_path", "emotional_sustainability"] } },
+      risk_warnings: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { option: {type: Type.STRING}, underestimated_risk: {type: Type.STRING}, why_it_is_dangerous: {type: Type.STRING} }, required: ["option", "underestimated_risk", "why_it_is_dangerous"] } },
+      experimentation_suggestions: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { option: {type: Type.STRING}, test_method: {type: Type.STRING}, cost: {type: Type.STRING}, timeframe: {type: Type.STRING} }, required: ["option", "test_method", "cost", "timeframe"] } },
+      stop_loss_signals: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { option: {type: Type.STRING}, signal: {type: Type.STRING}, action: {type: Type.STRING} }, required: ["option", "signal", "action"] } },
+      cooling_advice: { type: Type.OBJECT, properties: { emotional_bias_detected: {type: Type.STRING}, recommended_wait_time: {type: Type.STRING}, recheck_questions: {type: Type.ARRAY, items: {type: Type.STRING}} }, required: ["emotional_bias_detected", "recommended_wait_time", "recheck_questions"] }
+    },
+    required: ["decision_nature", "comparison_matrix", "risk_warnings", "experimentation_suggestions", "stop_loss_signals", "cooling_advice"]
   },
   extractor: (data: any) => ({
     decision_nature: data.decision_nature || { type: "Unknown", core_conflict: "Unknown", key_uncertainty: "Unknown" },
@@ -168,7 +242,17 @@ export const CostCalcConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (choice) => `客户选择："${choice}"。请开具发票。`,
   jsonStructure: `{ "invoiceId": "string", "currencyUnit": "string", "lineItems": [], "totalCost": "string", "finePrint": "string" }`,
-  schema: { type: Type.OBJECT, properties: { invoiceId: {type: Type.STRING}, currencyUnit: {type: Type.STRING}, lineItems: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {category: {type: Type.STRING}, description: {type: Type.STRING}, cost: {type: Type.STRING}}}}, totalCost: {type: Type.STRING}, finePrint: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      invoiceId: {type: Type.STRING}, 
+      currencyUnit: {type: Type.STRING}, 
+      lineItems: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {category: {type: Type.STRING}, description: {type: Type.STRING}, cost: {type: Type.STRING}}, required: ["category", "description", "cost"]}}, 
+      totalCost: {type: Type.STRING}, 
+      finePrint: {type: Type.STRING} 
+    },
+    required: ["invoiceId", "currencyUnit", "lineItems", "totalCost", "finePrint"]
+  },
   extractor: (data: any) => ({
       invoiceId: data.invoiceId || "INV-NULL",
       currencyUnit: data.currencyUnit || "Units",
@@ -187,7 +271,17 @@ export const DeceptionConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (narrative) => `解析这个叙事："${narrative}"。揭露真相。`,
   jsonStructure: `{ "bluePillNarrative": "string", "redPillTruth": "string", "glitchFactor": 0, "systemFailureLog": [], "realityPatch": "string" }`,
-  schema: { type: Type.OBJECT, properties: { bluePillNarrative: {type: Type.STRING}, redPillTruth: {type: Type.STRING}, glitchFactor: {type: Type.NUMBER}, systemFailureLog: {type: Type.ARRAY, items: {type: Type.STRING}}, realityPatch: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      bluePillNarrative: {type: Type.STRING}, 
+      redPillTruth: {type: Type.STRING}, 
+      glitchFactor: {type: Type.NUMBER}, 
+      systemFailureLog: {type: Type.ARRAY, items: {type: Type.STRING}}, 
+      realityPatch: {type: Type.STRING} 
+    },
+    required: ["bluePillNarrative", "redPillTruth", "glitchFactor", "systemFailureLog", "realityPatch"]
+  },
   extractor: (data: any) => ({
       bluePillNarrative: data.bluePillNarrative || "",
       redPillTruth: data.redPillTruth || "",
@@ -206,7 +300,17 @@ export const ExtremeSimConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (habit) => `坏习惯/诱因："${habit}"。推演蝴蝶效应。`,
   jsonStructure: `{ "disasterLevel": "CAT 1", "currentImpact": "string", "cascadeTimeline": [], "finalCollapse": "string", "tippingPoint": "string" }`,
-  schema: { type: Type.OBJECT, properties: { disasterLevel: {type: Type.STRING, enum: ['CAT 1', 'CAT 2', 'CAT 3', 'CAT 4', 'CAT 5']}, currentImpact: {type: Type.STRING}, cascadeTimeline: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {time: {type: Type.STRING}, event: {type: Type.STRING}, magnitude: {type: Type.NUMBER}}}}, finalCollapse: {type: Type.STRING}, tippingPoint: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      disasterLevel: {type: Type.STRING, enum: ['CAT 1', 'CAT 2', 'CAT 3', 'CAT 4', 'CAT 5']}, 
+      currentImpact: {type: Type.STRING}, 
+      cascadeTimeline: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {time: {type: Type.STRING}, event: {type: Type.STRING}, magnitude: {type: Type.NUMBER}}, required: ["time", "event", "magnitude"]}}, 
+      finalCollapse: {type: Type.STRING}, 
+      tippingPoint: {type: Type.STRING} 
+    },
+    required: ["disasterLevel", "currentImpact", "cascadeTimeline", "finalCollapse", "tippingPoint"]
+  },
   extractor: (data: any) => ({
       disasterLevel: data.disasterLevel || "CAT 1",
       currentImpact: data.currentImpact || "",
@@ -225,7 +329,16 @@ export const JuryConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (decision) => `议题："${decision}"。召开紧急会议。`,
   jsonStructure: `{ "councilName": "string", "chaosMeter": 0, "jurors": [], "finalDecree": "string" }`,
-  schema: { type: Type.OBJECT, properties: { councilName: {type: Type.STRING}, chaosMeter: {type: Type.NUMBER}, jurors: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {archetype: {type: Type.STRING}, icon: {type: Type.STRING}, stance: {type: Type.STRING, enum: ['SUPPORT', 'OPPOSE', 'ABSTAIN']}, intensity: {type: Type.NUMBER}, monologue: {type: Type.STRING}}}}, finalDecree: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      councilName: {type: Type.STRING}, 
+      chaosMeter: {type: Type.NUMBER}, 
+      jurors: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {archetype: {type: Type.STRING}, icon: {type: Type.STRING}, stance: {type: Type.STRING, enum: ['SUPPORT', 'OPPOSE', 'ABSTAIN']}, intensity: {type: Type.NUMBER}, monologue: {type: Type.STRING}}, required: ["archetype", "icon", "stance", "intensity", "monologue"]}}, 
+      finalDecree: {type: Type.STRING} 
+    },
+    required: ["councilName", "chaosMeter", "jurors", "finalDecree"]
+  },
   extractor: (data: any) => ({
       councilName: data.councilName || "Council",
       chaosMeter: data.chaosMeter || 0,
@@ -243,7 +356,18 @@ export const DebateConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (topic) => `开启辩论角斗。话题："${topic}"。`,
   jsonStructure: `{ "topic": "string", "redFighter": { "name": "string", "style": "string" }, "blueFighter": { "name": "string", "style": "string" }, "rounds": [], "winner": "DRAW", "fatalityMove": "string" }`,
-  schema: { type: Type.OBJECT, properties: { topic: {type: Type.STRING}, redFighter: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, style: {type: Type.STRING}}}, blueFighter: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, style: {type: Type.STRING}}}, rounds: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {roundName: {type: Type.STRING}, redMove: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, content: {type: Type.STRING}, damage: {type: Type.NUMBER}}}, blueMove: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, content: {type: Type.STRING}, damage: {type: Type.NUMBER}}}}}}, winner: {type: Type.STRING, enum: ['RED', 'BLUE', 'DRAW']}, fatalityMove: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      topic: {type: Type.STRING}, 
+      redFighter: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, style: {type: Type.STRING}}, required: ["name", "style"]}, 
+      blueFighter: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, style: {type: Type.STRING}}, required: ["name", "style"]}, 
+      rounds: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {roundName: {type: Type.STRING}, redMove: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, content: {type: Type.STRING}, damage: {type: Type.NUMBER}}, required: ["name", "content", "damage"]}, blueMove: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, content: {type: Type.STRING}, damage: {type: Type.NUMBER}}, required: ["name", "content", "damage"]}}, required: ["roundName", "redMove", "blueMove"]}}, 
+      winner: {type: Type.STRING, enum: ['RED', 'BLUE', 'DRAW']}, 
+      fatalityMove: {type: Type.STRING} 
+    },
+    required: ["topic", "redFighter", "blueFighter", "rounds", "winner", "fatalityMove"]
+  },
   extractor: (data: any) => ({
       topic: data.topic || "",
       redFighter: data.redFighter || { name: "Red", style: "Aggressive" },
@@ -263,7 +387,19 @@ export const CodeArchConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (code) => `鉴定这段代码遗物：\n${code}`,
   jsonStructure: `{ "carbonDating": "string", "techStackLayer": "string", "authorProfile": {}, "spaghettiIndex": 0, "excavationReport": "string", "fossilFaults": [], "curatorNote": "string" }`,
-  schema: { type: Type.OBJECT, properties: { carbonDating: {type: Type.STRING}, techStackLayer: {type: Type.STRING}, authorProfile: {type: Type.OBJECT, properties: {mentalState: {type: Type.STRING}, caffeineLevel: {type: Type.STRING}, hairLossRisk: {type: Type.STRING}}}, spaghettiIndex: {type: Type.NUMBER}, excavationReport: {type: Type.STRING}, fossilFaults: {type: Type.ARRAY, items: {type: Type.STRING}}, curatorNote: {type: Type.STRING} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      carbonDating: {type: Type.STRING}, 
+      techStackLayer: {type: Type.STRING}, 
+      authorProfile: {type: Type.OBJECT, properties: {mentalState: {type: Type.STRING}, caffeineLevel: {type: Type.STRING}, hairLossRisk: {type: Type.STRING}}, required: ["mentalState", "caffeineLevel", "hairLossRisk"]}, 
+      spaghettiIndex: {type: Type.NUMBER}, 
+      excavationReport: {type: Type.STRING}, 
+      fossilFaults: {type: Type.ARRAY, items: {type: Type.STRING}}, 
+      curatorNote: {type: Type.STRING} 
+    },
+    required: ["carbonDating", "techStackLayer", "authorProfile", "spaghettiIndex", "excavationReport", "fossilFaults", "curatorNote"]
+  },
   extractor: (data: any) => ({
       carbonDating: data.carbonDating || "Unknown Era",
       techStackLayer: data.techStackLayer || "Unknown Layer",
@@ -284,7 +420,17 @@ export const DevilsConfig: AIToolConfig<string> = {
   ),
   userPromptBuilder: (opinion) => `把这个观点带上审判庭："${opinion}"`,
   jsonStructure: `{ "verdict": "string", "logicalCrimes": [], "tortureSession": [], "forcedConfession": "string", "sanityScore": 0 }`,
-  schema: { type: Type.OBJECT, properties: { verdict: {type: Type.STRING}, logicalCrimes: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, description: {type: Type.STRING}, sentence: {type: Type.STRING}}}}, tortureSession: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {tool: {type: Type.STRING}, method: {type: Type.STRING}, outcome: {type: Type.STRING}}}}, forcedConfession: {type: Type.STRING}, sanityScore: {type: Type.NUMBER} } },
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      verdict: {type: Type.STRING}, 
+      logicalCrimes: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, description: {type: Type.STRING}, sentence: {type: Type.STRING}}, required: ["name", "description", "sentence"]}}, 
+      tortureSession: {type: Type.ARRAY, items: {type: Type.OBJECT, properties: {tool: {type: Type.STRING}, method: {type: Type.STRING}, outcome: {type: Type.STRING}}, required: ["tool", "method", "outcome"]}}, 
+      forcedConfession: {type: Type.STRING}, 
+      sanityScore: {type: Type.NUMBER} 
+    },
+    required: ["verdict", "logicalCrimes", "tortureSession", "forcedConfession", "sanityScore"]
+  },
   extractor: (data: any) => ({
       verdict: data.verdict || "逻辑混沌罪",
       logicalCrimes: Array.isArray(data.logicalCrimes) ? data.logicalCrimes : [],
@@ -303,5 +449,17 @@ export const StitcherConfig: AIToolConfig<{termA: string, termB: string}> = {
   ),
   userPromptBuilder: ({termA, termB}) => `强制缝合这两个概念："${termA}" + "${termB}"。生成项目路演材料。`,
   jsonStructure: `{ "startupName": "string", "tagline": "string", "userPersona": {}, "revenueModel": "string", "growthHack": "string", "vcVerdict": "string", "unicornProbability": 0 }`,
-  schema: { type: Type.OBJECT, properties: { startupName: {type: Type.STRING}, tagline: {type: Type.STRING}, userPersona: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, description: {type: Type.STRING}, desire: {type: Type.STRING}}}, revenueModel: {type: Type.STRING}, growthHack: {type: Type.STRING}, vcVerdict: {type: Type.STRING}, unicornProbability: {type: Type.NUMBER} } }
+  schema: { 
+    type: Type.OBJECT, 
+    properties: { 
+      startupName: {type: Type.STRING}, 
+      tagline: {type: Type.STRING}, 
+      userPersona: {type: Type.OBJECT, properties: {name: {type: Type.STRING}, description: {type: Type.STRING}, desire: {type: Type.STRING}}, required: ["name", "description", "desire"]}, 
+      revenueModel: {type: Type.STRING}, 
+      growthHack: {type: Type.STRING}, 
+      vcVerdict: {type: Type.STRING}, 
+      unicornProbability: {type: Type.NUMBER} 
+    },
+    required: ["startupName", "tagline", "userPersona", "revenueModel", "growthHack", "vcVerdict", "unicornProbability"]
+  }
 };
