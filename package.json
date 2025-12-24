@@ -1,18 +1,26 @@
-
 {
-  "name": "deep-dissect-server",
+  "name": "deep-dissect-lab",
   "version": "1.0.0",
-  "description": "Proxy server for DeepSeek API",
-  "main": "server.js",
+  "description": "Deep Dissect Lab - Cognitive Analysis Tools",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node server.js",
+    "start": "node server.js"
   },
   "dependencies": {
+    "@google/genai": "^0.1.1",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.1"
+  }
 }
